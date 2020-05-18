@@ -23,18 +23,19 @@ void test(){
 
 	int* pi = (int*)malloc(sizeof(int));
 	int* pi2 = (int*)realloc(pi, sizeof(int)* 4);// 原地扩容
-	int* pi3 = (int*)realloc(pi2, sizeof(int)* 1000); // 非原地扩容, 前面的空间都释放掉了
+	int* pi3 = (int*)realloc(pi2, sizeof(int)* 1000); // 非原地扩容,因为后面的空间不够用了, 只能重新开辟空间,  而且把前面的原有指向的所有空间都释放掉了 (pi和pi2指向的空间)
 	int* pi4 = (int*)realloc(pi3, sizeof(int)); // 缩容
-	int* pi5 = (int*)realloc(NULL, sizeof(int));// 相当于malloc
+	// int* pi5 = (int*)realloc(NULL, sizeof(int));// 相当于malloc
 
-	// realloc不需要显示释放传入realloc的指针参数所指向的空间
-	free(pi); // 会崩
-	//free(pi2);// 会崩
-	free(pi3);// 会崩
-	//free(pi4);// 不会崩 --> 只需要释放realloc的返回值
-	//free(pi5);// 会崩
-	//int* pi6 = (int*)calloc(4, sizeof(int)); // 申请空间 + 做空间0初始化
-	//free(pi6);
+	// realloc 不需要显示释放传入realloc的指针参数所指向的空间
+	// free(pi); // 会崩 因为pi和pi2指向的空间已被释放掉
+	// free(pi2);// 会崩
+	// free(pi3);// 不会崩 
+	// 只需释放最后一次realloc返回的指针所指向的空间即可, 
+	free(pi4);// 不会崩 两个同时出现 后者崩了, 因为指向的是同一片空间 
+	// free(pi5);// 会崩
+	int* pi6 = (int*)calloc(4, sizeof(int)); // 申请空间 + 做空间0初始化
+	free(pi6);
 }
 
 /* 3. new/delete   new []/delete[]
@@ -118,7 +119,7 @@ void test3(){
 	delete[] array2;
 
 	A* pa = new A(10, 9, 8);// 调带参构造
-	A* pa = new A; // 调默认构造
+	A* pa1 = new A; // 调默认构造
 
 	A* pcopy = new A(*pa);// 也可以调拷贝构造
 }
@@ -202,8 +203,8 @@ void test7()
 }
 
 int main(){
-	test2();
-	//test();
+	//test2();
+	test();
 	/*
 	char* pChar3 = "abcd";
 	cout << sizeof(pChar3) << endl;
